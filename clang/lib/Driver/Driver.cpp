@@ -4593,25 +4593,16 @@ void Driver::BuildActions(Compilation &C, DerivedArgList &Args,
 
   handleArguments(C, Args, Inputs, Actions);
 
-  if (Args.hasFlag(options::OPT_fmodules_driver,
-                   options::OPT_fno_modules_driver, false)) {
-    Diags.Report(diag::remark_fmodules_driver_enabled);
-    // TODO: Move the logic for implicitly enabling explicit-module-builds out
-    // of -fmodules-driver once it is no longer experimental.
-    // Currently, this serves diagnostic purposes only.
-    bool UsesCXXModules = hasCXXModuleInputType(Inputs);
-    if (!UsesCXXModules) {
-      const auto ErrOrScanResult = ScanInputsForCXXModuleUsage(Inputs);
-      if (!ErrOrScanResult) {
-        Diags.Report(diag::err_cannot_open_file)
-            << ErrOrScanResult.getError().message();
-        return;
-      }
-      UsesCXXModules = *ErrOrScanResult;
+  // For the benchmark, always run the check for C++ modules use!
+  bool UsesCXXModules = hasCXXModuleInputType(Inputs);
+  if (!UsesCXXModules) {
+    const auto ErrOrScanResult = ScanInputsForCXXModuleUsage(Inputs);
+    if (!ErrOrScanResult) {
+      Diags.Report(diag::err_cannot_open_file)
+          << ErrOrScanResult.getError().message();
+      return;
     }
-    if (UsesCXXModules)
-      BuildExplicitModuleBuildActions(C, Args, Inputs, Actions);
-    return;
+    UsesCXXModules = *ErrOrScanResult;
   }
 
   Driver::BuildDefaultActions(C, Args, Inputs, Actions);
