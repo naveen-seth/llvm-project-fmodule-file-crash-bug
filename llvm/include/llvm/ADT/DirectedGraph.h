@@ -180,6 +180,7 @@ public:
   NodeType &back() { return *Nodes.back(); }
 
   size_t size() const { return Nodes.size(); }
+  bool empty() const { return Nodes.empty(); }
 
   /// Find the given node \p N in the table.
   const_iterator findNode(const NodeType &N) const {
