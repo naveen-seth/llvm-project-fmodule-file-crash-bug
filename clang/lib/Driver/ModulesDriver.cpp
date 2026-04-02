@@ -746,7 +746,9 @@ public:
 
   CGNode(const NodeKind K) : Kind(K) {}
   CGNode(const CGNode &) = delete;
-  CGNode(CGNode &&) = delete;
+  CGNode &operator=(const CGNode &) = delete;
+  CGNode(CGNode &&) = default;
+  CGNode &operator=(CGNode &&) = default;
   virtual ~CGNode() = 0;
 
   NodeKind getKind() const { return Kind; }
@@ -907,7 +909,10 @@ class CompilationGraph : public CGBase {
 public:
   CompilationGraph() = default;
   CompilationGraph(const CompilationGraph &) = delete;
-  CompilationGraph(CompilationGraph &&G) = default;
+  CompilationGraph &operator=(const CompilationGraph &) = delete;
+  CompilationGraph(CompilationGraph &&) = default;
+  CompilationGraph &operator=(CompilationGraph &&) = default;
+  ~CompilationGraph() = default;
 
   CGNode &getRoot() const {
     assert(Root && "Root node has not yet been created!");
