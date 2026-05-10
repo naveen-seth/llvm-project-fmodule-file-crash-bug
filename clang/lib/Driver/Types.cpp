@@ -59,7 +59,8 @@ types::ID types::getPreprocessedType(ID Id) {
 }
 
 static bool isPreprocessedModuleType(ID Id) {
-  return Id == TY_CXXModule || Id == TY_PP_CXXModule;
+  return Id == TY_CXXModule || Id == TY_CXXStdModule ||
+         Id == TY_PP_CXXStdModule || Id == TY_PP_CXXModule;
 }
 
 static bool isPreprocessedHeaderUnitType(ID Id) {
@@ -148,8 +149,12 @@ bool types::isAcceptedByClang(ID Id) {
   case TY_CXXHUHeader:
   case TY_PP_CXXHeaderUnit:
   case TY_ObjCXXHeader: case TY_PP_ObjCXXHeader:
-  case TY_CXXModule: case TY_PP_CXXModule:
-  case TY_AST: case TY_ModuleFile: case TY_PCH:
+  case TY_CXXModule:
+  case TY_CXXStdModule:
+  case TY_PP_CXXModule:
+  case TY_AST:
+  case TY_ModuleFile:
+  case TY_PCH:
   case TY_LLVM_IR: case TY_LLVM_BC:
   case TY_API_INFO:
     return true;
@@ -209,6 +214,8 @@ bool types::isDerivedFromC(ID Id) {
   case TY_ObjCXXHeader:
   case TY_CXXModule:
   case TY_PP_CXXModule:
+  case TY_CXXStdModule:
+  case TY_PP_CXXStdModule:    
     return true;
   }
 }
@@ -253,6 +260,8 @@ bool types::isCXX(ID Id) {
   case TY_ObjCXXHeader: case TY_PP_ObjCXXHeader:
   case TY_CXXModule:
   case TY_PP_CXXModule:
+  case TY_CXXStdModule:
+  case TY_PP_CXXStdModule:    
   case TY_ModuleFile:
   case TY_PP_CLCXX:
   case TY_CUDA: case TY_PP_CUDA: case TY_CUDA_DEVICE:
@@ -435,6 +444,7 @@ ID types::lookupHeaderTypeForSourceType(ID Id) {
     return types::TY_CHeader;
   case types::TY_CXX:
   case types::TY_CXXModule:
+  case types::TY_CXXStdModule:
     return types::TY_CXXHeader;
   case types::TY_ObjC:
     return types::TY_ObjCHeader;

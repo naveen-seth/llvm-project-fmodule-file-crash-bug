@@ -146,7 +146,7 @@ void driver::modules::buildStdModuleManifestInputs(
   for (const auto &Entry : ManifestEntries) {
     auto *InputArg =
         makeInputArg(Args, Opts, Args.MakeArgString(Entry.SourcePath));
-    Inputs.emplace_back(types::TY_CXXModule, InputArg);
+    Inputs.emplace_back(types::TY_CXXStdModule, InputArg);
   }
 }
 
@@ -1213,7 +1213,8 @@ static bool validateScannedJobInputKinds(
     const auto &MainInput = Job.getInputInfos().front();
     const bool DefinesNamedModule = !InputDeps.ModuleName.empty();
 
-    if (DefinesNamedModule && MainInput.getType() != types::TY_CXXModule) {
+    if (DefinesNamedModule && (MainInput.getType() != types::TY_CXXModule &&
+                               MainInput.getType() != types::TY_CXXStdModule)) {
       Diags.Report(diag::err_module_defined_outside_of_module_source)
           << InputDeps.ModuleName << MainInput.getFilename();
       return false;
@@ -1558,8 +1559,13 @@ static void configureNamedModuleOutputArg(Compilation &C,
   auto &Job = *Node.Job;
   const auto &TCArgs = getToolChainArgs(C, Job);
   auto JobArgs = Job.getArguments();
-  JobArgs.push_back(
-      TCArgs.MakeArgString("-fmodule-output=" + ModuleOutputPath));
+  if (Job.getInputInfos().front().getType() == types::TY_CXXStdModule) {
+    JobArgs.push_back(TCArgs.MakeArgString("-o"));
+    JobArgs.push_back(TCArgs.MakeArgString(ModuleOutputPath));
+  } else {
+    JobArgs.push_back(
+        TCArgs.MakeArgString("-fmodule-output=" + ModuleOutputPath));
+  }
   Job.replaceArguments(std::move(JobArgs));
 }
 
